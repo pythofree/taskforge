@@ -42,6 +42,7 @@ def execute_task(self, task_id: str):
 
     _log(task, 'Completed successfully.')
     _notify(task_id, 'task_completed', result=result)
+    _trigger_webhooks(task_id, 'task.completed')
 
 
 def _run_handler(task):
@@ -83,6 +84,15 @@ def _handle_failure(celery_task, task, exc):
         task.save(update_fields=['status', 'retry_count', 'error_message', 'completed_at', 'updated_at'])
         _log(task, f'Failed permanently after {task.retry_count} attempts: {exc}', level='error')
         _notify(str(task.id), 'task_status_changed', status=task.status)
+        _trigger_webhooks(str(task.id), 'task.failed')
+
+
+def _trigger_webhooks(task_id: str, event: str):
+    try:
+        from workers.tasks.webhook_delivery import deliver_webhooks
+        deliver_webhooks.delay(task_id, event)
+    except Exception as e:
+        logger.warning(f'Webhook trigger failed: {e}')
 
 
 def _log(task, message, level='info'):

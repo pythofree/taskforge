@@ -1,5 +1,8 @@
 from django.urls import path
 
+from .views import WebhookDestroyView, WebhookListCreateView
+
 urlpatterns = [
-    # Day 9: Webhook endpoints will be added here
+    path('', WebhookListCreateView.as_view(), name='webhook-list-create'),
+    path('<uuid:pk>/', WebhookDestroyView.as_view(), name='webhook-destroy'),
 ]

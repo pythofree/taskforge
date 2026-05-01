@@ -10,6 +10,7 @@ app.autodiscover_tasks()
 app.conf.imports = (
     'workers.tasks.executor',
     'workers.tasks.maintenance',
+    'workers.tasks.webhook_delivery',
 )
 
 
