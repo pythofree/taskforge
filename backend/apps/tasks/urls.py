@@ -1,5 +1,11 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from .views import TaskViewSet
+
+router = DefaultRouter()
+router.register(r'', TaskViewSet, basename='task')
 
 urlpatterns = [
-    # Day 4: Task CRUD endpoints will be added here
+    path('', include(router.urls)),
 ]
