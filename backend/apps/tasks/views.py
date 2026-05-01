@@ -30,7 +30,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         task = serializer.save(user=request.user)
-        # Celery enqueue will be wired on Day 5
+        from workers.dispatch import dispatch_task
+        dispatch_task(task)
         return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
@@ -58,7 +59,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.error_message = ''
         task.result = None
         task.save(update_fields=['status', 'retry_count', 'error_message', 'result', 'updated_at'])
-        # Re-enqueue on Day 5
+        from workers.dispatch import dispatch_task
+        dispatch_task(task)
         return Response(TaskSerializer(task).data)
 
     @action(detail=True, methods=['get'])
